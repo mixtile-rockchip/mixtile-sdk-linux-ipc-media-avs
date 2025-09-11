@@ -15,6 +15,14 @@
 
 #include <vector>
 
+#define AVS_VER "v6.9b5"
+
+#ifdef __ANDROID__
+#define AVS_DEBUG_LOG_GATE "vendor.gpu.avs.log"
+#else
+#define AVS_DEBUG_LOG_ENV "RK_GPU_AVS_DEBUG_LOG"
+#endif
+
 typedef unsigned int uint32_t;
 
 typedef enum rkPSR_FORMAT_E {
@@ -24,9 +32,21 @@ typedef enum rkPSR_FORMAT_E {
 } PSR_FORMAT_E;
 
 typedef enum rkPSR_FUSE_TYPE_E {
-    FUSE_ALPHA      = 0,              // alpha融合,当频段数为0时为alpha融合，未支持
-    FUSE_MULTI_BAND = 1,              // 多频段融合
+    FUSE_MULTI_BAND = 0,                // 多频段融合, 需上传alpha, 当频段数为0时为简单alpha融合
+    FUSE_MULTI_BAND_DYNAMIC_ALPHA = 1,  // 动态拼缝多频段融合, 仅支持 FUSE_GPU_ALPHA_U8 格式
 } PSR_FUSE_TYPE_E;
+
+typedef enum rkPSR_FUSE_ALPHA_TYPE_E { // 多频段融合使用的alpha数据类型
+    FUSE_GPU_ALPHA_FLOAT = 0,          // float
+    FUSE_GPU_ALPHA_U8 = 1,             // uchar
+} PSR_FUSE_ALPHA_TYPE_E;
+
+typedef enum rkPSR_DA_MODE_E {        //动态拼缝多频段融合可选择的模式
+    DA_MODE_ACCURATE = 0,
+    DA_MODE_FAST = 1,
+    DA_MODE_SLOW_ACCURATE = 2,
+    DA_MODE_BUTT
+} PSR_DA_MODE_E;
 
 typedef struct rkPSR_BLOCK_GAINS_PARAMS { //亮度矫正使用，预留，未支持
     int input_image_width;
@@ -44,7 +64,6 @@ typedef struct rkPSR_OVERLAP_BLOCK {
     std::vector<int> band_num;       // 图像进行多频段融合时分成的频段数
     std::vector<int> dst_startx;     // 通过表校正后输出图的起始位置
     std::vector<int> dst_width;      // 通过表校正后输出图的宽度
-    std::vector<int> dst_stride;     // 通过表校正后输出图的stride
     std::vector<int> mesh_width;     // mesh表的宽度
     std::vector<int> mesh_height;    // mesh表的高度
     std::vector<int> alpha_width;    // alpha表的宽度(第0层)
@@ -82,6 +101,25 @@ typedef struct PSR_INITPARAMS_S {
     uint32_t useSync;
 } PSR_INITPARAMS_T;
 
+typedef struct PSR_DRM_BUF_MSG_S{
+    void *vir_addr;  //虚拟地址
+    int mem_fd;
+    int mem_offset;  //虚拟地址的偏移量，需要赋初始值0
+    long mem_size;   //GPU拼接内部暂不需要该值
+}PSR_DRM_BUF_MSG_T;
+
+typedef struct PSR_REMAP_MESH_S {
+    int meshIndex;       // mesh表的索引值
+    int meshxStep_;      // 生成mesh表时x方向的步长
+    int meshyStep_;      // 生成mesh表时y方向的步长
+    int meshWidth_;      // mesh表的宽度
+    int meshHeight_;     // mesh表的高度
+    void* meshxBufAddr_;  // mesh表x坐标的保存地址
+    int meshxFd_;         // mesh表x坐标的fd
+    void* meshyBufAddr_;  // mesh表y坐标的保存地址
+    int meshyFd_;         // mesh表y坐标的fd
+} PSR_REMAP_MESH;
+
 typedef struct RKGFX_AVS_CONTEXT_S {
     uint32_t  apiVersion;
     uint32_t  numView;
@@ -97,11 +135,12 @@ typedef struct RKGFX_AVS_CONTEXT_S {
     uint32_t  useFd;
     int      *inputFdArray;
     uint32_t  useSync;
+    int       avsFuseType;    //多频段融合类型，定义见: PSR_FUSE_TYPE_E
+    int       avsAlphaType;   //融合使用的ALPHA表数据类型，定义见：PSR_FUSE_ALPHA_TYPE_E
     uint32_t  useMeshBufAddress;
     void *AVS_initParams;
-    void **meshxBufAddressArray;
-    void **meshyBufAddressArray;
-    void **meshAlphaBufAddressArray;
+    void **avsRemapMeshArray; //存放 PSR_REMAP_MESH 指针的数组指针
+    void **meshAlphaDrmBufMsgArray;  //存放 PSR_DRM_BUF_MSG_T 指针的数组指针
 } RKGFX_AVS_CONTEXT_T;
 
 typedef enum {
@@ -117,7 +156,8 @@ extern "C"
 
 RKGFX_AVS_STATUS RKGFX_AVS_init(void* context);
 RKGFX_AVS_STATUS RKGFX_AVS_AllProcess(void* context);
-RKGFX_AVS_STATUS RKGFX_AVS_resize (void* context);
+RKGFX_AVS_STATUS RKGFX_AVS_resize(void* context);
+RKGFX_AVS_STATUS RKGFX_AVS_update_mesh(void* context, PSR_REMAP_MESH* newMesh);
 RKGFX_AVS_STATUS RKGFX_AVS_deinit(void* context);
 RKGFX_AVS_STATUS RKGFX_AVS_wait_sync(void* gles_proceess_sync);
 void* RKGFX_AVS_create_sync(void);

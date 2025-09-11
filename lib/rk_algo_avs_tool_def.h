@@ -54,20 +54,6 @@ extern "C" {
     }RKALGO_AVS_MIDDLE_LUT_PARAMS_S;
 
     /*
-    * @struct  RKALGO_AVS_MIDDLE_LUT_BUFFER_S
-    * @brief   the structure of output buffer for generating middle LUT from calib file
-    * [I]middleLutType              : the type of middle LUT
-    * [I]middleLutSize              : the size of middle LUT buffer
-    * [O]pMiddleLutBuf              : the middle LUT buffer
-    */
-    typedef struct rkAlgoAVS_MIDDLE_LUT_BUFFER_S
-    {
-        RKALGO_AVS_MIDDLE_LUT_TYPE_E middleLutType;
-        uint32_t middleLutSize;
-        float *pMiddleLutBuf[RKALGO_AVS_MAX_CAMERA_NUM];
-    }RKALGO_AVS_MIDDLE_LUT_BUFFER_S;
-
-    /*
     * @struct  RKALGO_AVS_COMPUTE_FINAL_LUT_SIZE_PARAMS_S
     * @brief   the structure of params for computing the max size of final LUT buffer
     * [I]cameraNum                 : the number of camera
@@ -449,6 +435,214 @@ extern "C" {
         int32_t  s32AvsRoiCenterX;
         int32_t  s32AvsRoiCenterY;
     }RKALGO_AVS_ROI_PARAMS_TRANSFORM_OUT_S;
+    /*
+    * @struct rkAlgoAVS_OVERLAP_PARAMS_S
+    * @brief the structure of params for overlap
+    * [O]u32OverlapX        : the starting x-coordinate of the overlapping area
+    * [O]u32OverlapY        : the starting y-coordinate of the overlapping area
+    * [O]u32OverlapW        : width of overlapping areas
+    * [O]u32OverlapH        : height of overlapping areas
+    */
+    typedef struct rkAlgoAVS_OVERLAP_PARAMS_S
+    {
+
+        uint32_t u32OverlapX;
+        uint32_t u32OverlapY;
+        uint32_t u32OverlapW;
+        uint32_t u32OverlapH;
+    }RKALGO_AVS_OVERLAP_PARAMS_S;
+    /* 
+    * @struct rkAlgoAVS_GROUND_MODEL_OPTIMIZE_PARAMS_S
+    * @brief the structure of optimize ground model
+    * [I]cameraNum                  : the number of camera
+    * [I]stitchDistance             : the best stitch distance
+    * [I]cameraHeight               : camera ground height
+    * [I]srcW                       : input image width
+    * [I]srcH                       : input image height
+    * [I]dstW                       : output image width
+    * [I]dstH                       : output image height
+    * [I]fovX100                    : output image fov in x direction
+    * [I]fovY100                    : output image fov in y direction
+    * [I]centerX                    : output image project center coordinate in x direction
+    * [I]centerY                    : output image project center coordinate in y direction
+    * [I]oriRotation                : output image original rotation
+    * [I]rotation                   : output image rotation
+    * [I]scaleRatio                 : stitch image scaling factor
+    * [I]inputMaskConfig            : the config of input mask
+    * [I]finalLutFuseWidth          : the fuse width of final LUT, its value must be 128, 256 or 512
+    * [I]pcOutputPath               : calibration file output path
+    * [I]flag                       : ground model optimization options
+    */
+    typedef struct rkAlgoAVS_GROUND_MODEL_OPTIMIZE_PARAMS_S
+    {
+        /* input params */
+        RKALGO_AVS_CALIB_BUFFER_S calibBuf;
+        uint32_t cameraNum;
+        float stitchDistance;
+        float groundDistance;
+        RKALGO_AVS_PROJECT_TYPE_E projectType;
+        RKALGO_AVS_IMG_FORMAT_E srcImgFormat;
+        uint32_t srcW;
+        uint32_t srcH;
+        uint32_t dstW;
+        uint32_t dstH;
+        uint8_t* pSrcImageBuf[RKALGO_AVS_MAX_CAMERA_NUM];
+        uint32_t fovX100;
+        uint32_t fovY100;
+        int32_t centerX;
+        int32_t centerY;
+        RKALGO_AVS_ROTATION_S oriRotation;
+        RKALGO_AVS_ROTATION_S rotation;
+        float scaleRatio;                                                      
+        RKALGO_AVS_MASK_CONFIG_S inputMaskConfig;
+        RKALGO_AVS_FUSE_WIDTH_E finalLutFuseWidth;
+        const char* pcOutputPath;
+        RKALGO_AVS_GROUND_MODEL_OPTIMIZE_OPTION_E flag;
+    }RKALGO_AVS_GROUND_MODEL_OPTIMIZE_PARAMS_S;
+
+    /*
+    * @struct rkAlgoAVS_GROUND_MODEL_PARAMS_S
+    * @brief the structure of input pramas for ground model
+    * [I]calibBuf                   : the buffer of calib file params
+    * [I]cameraNum                  : the number of camera
+    * [I]stitchDistance             : the best stitch distance
+    * [I]projectType                : projection type
+    * [I]groundDistance             : the distance between camera and ground plane, unit: meter
+    * [I]srcW                       : input image width
+    * [I]srcH                       : input image height
+    * [I]dstW                       : output image width
+    * [I]dstH                       : output image height
+    * [I]fovX100                    : output image fov in x direction
+    * [I]fovY100                    : output image fov in y direction
+    * [I]centerX                    : output image project center coordinate in x direction
+    * [I]centerY                    : output image project center coordinate in y direction
+    * [I]oriRotation                : output image original rotation
+    * [I]rotation                   : output image rotation
+    * [I]inputMaskConfig            : the config of input mask
+    * [I]finalLutType               : the type of final LUT
+    * [I]finalLutStepX              : the step of final LUT in x direction
+    * [I]finalLutStepY              : the step of final LUT in y direction
+    * [I]finalLutFuseWidth          : the fuse width of final LUT, its value must be 128, 256 or 512
+    * [I]highFrequencyFuseWidth     : the high-frequency fuse width, Range:[8,finalLutFuseWidth]
+    */
+
+    typedef struct rkAlgoAVS_GROUND_MODEL_PARAMS_S
+    {
+        /* input params */
+        RKALGO_AVS_CALIB_BUFFER_S calibBuf;
+        uint32_t cameraNum;
+        float stitchDistance;
+        float groundDistance;
+        RKALGO_AVS_PROJECT_TYPE_E projectType;
+        uint32_t srcW;
+        uint32_t srcH;
+        uint32_t dstW;
+        uint32_t dstH;
+        uint32_t fovX100;
+        uint32_t fovY100;
+        int32_t centerX;
+        int32_t centerY;
+        RKALGO_AVS_ROTATION_S oriRotation;
+        RKALGO_AVS_ROTATION_S rotation;
+        RKALGO_AVS_MASK_CONFIG_S inputMaskConfig;
+        /* input params for final LUT */
+        RKALGO_AVS_FINAL_LUT_TYPE_E finalLutType;
+        uint32_t finalLutStepX;
+        uint32_t finalLutStepY;
+        RKALGO_AVS_FUSE_WIDTH_E finalLutFuseWidth;
+        int32_t highFrequencyFuseWidth;
+
+    }RKALGO_AVS_GROUND_MODEL_PARAMS_S;
+
+    /*
+    * @struct rkAlgoAVS_AUTO_STITCH_DISTANCE_PARAMS
+    * @brief the structure of input pramas for automatic calculation of stitch distance
+    * [I]calibBuf                   : the buffer of calib file params
+    * [I]cameraNum                  : the number of camera
+    * [I]inputStitchDistance        : The initial input stitch distance
+    * [I]projectType                : projection type
+    * [I]srcW                       : input image width
+    * [I]srcH                       : input image height
+    * [I]dstW                       : output image width
+    * [I]dstH                       : output image height
+    * [I]fovX100                    : output image fov in x direction
+    * [I]fovY100                    : output image fov in y direction
+    * [I]centerX                    : output image project center coordinate in x direction
+    * [I]centerY                    : output image project center coordinate in y direction
+    * [I]oriRotation                : output image original rotation
+    * [I]rotation                   : output image rotation
+    * [I]scaleRatio                 : stitch image scaling factor
+    * [I]inputMaskConfig            : the config of input mask
+    * [I]finalLutFuseWidth          : the fuse width of final LUT, its value must be 128, 256 or 512
+    * [I]pSrcImageBuf               : the buffer of input images
+    */
+    typedef struct rkAlgoAVS_AUTO_STITCH_DISTANCE_PARAMS
+    {
+        /* input params */
+        RKALGO_AVS_CALIB_BUFFER_S calibBuf;
+        uint32_t cameraNum;
+        float inputStitchDistance;
+        float groundDistance;
+        RKALGO_AVS_PROJECT_TYPE_E projectType;
+        uint32_t srcW;
+        uint32_t srcH;
+        uint32_t dstW;
+        uint32_t dstH;
+        uint32_t fovX100;
+        uint32_t fovY100;
+        int32_t centerX;
+        int32_t centerY;
+        RKALGO_AVS_ROTATION_S oriRotation;
+        RKALGO_AVS_ROTATION_S rotation;
+        float scaleRatio;
+        RKALGO_AVS_MASK_CONFIG_S inputMaskConfig;
+        RKALGO_AVS_FUSE_WIDTH_E finalLutFuseWidth;
+        uint8_t* pSrcImageBuf[RKALGO_AVS_MAX_CAMERA_NUM];
+        RKALGO_AVS_IMG_FORMAT_E srcImgFormat;
+    }RKALGO_AVS_AUTO_STITCH_DISTANCE_PARAM_S;
+     
+
+    /*
+    * @struct rkAlgAVS_GOOD_PARAMS_CONFIG_S
+    * @brief the structure of input pramas for good parameters
+    * [I]calibBuf                   : the buffer of calib file params
+    * [I]cameraNum                  : the number of camera
+    * [I]stitchDistance             : the best stitch distance
+    * [I]projectType                : projection type
+    * [I]srcW                       : input image width
+    * [I]srcH                       : input image height
+    * [I]dstW                       : output image width
+    * [I]dstH                       : output image height
+    * [I]oriRotation                : output image original rotation
+    */
+    typedef struct rkAlgAVS_GOOD_PARAMS_CONFIG_S
+    {
+        RKALGO_AVS_CALIB_BUFFER_S calibBuf;
+        uint32_t cameraNum;
+        float stitchDistance;
+        uint32_t srcW;
+        uint32_t srcH;
+        uint32_t dstW;
+        uint32_t dstH;
+        RKALGO_AVS_ROTATION_S oriRotation;
+    }RKALGO_AVS_GOOD_PARAMS_CONFIG_S;
+
+
+    /*
+    * @struct rkAlgoAVS_PROJECT_CONFIG_S
+    * @brief the structure of out pramas for project parameters
+    * [O]fovX100                    : output image fov in x direction
+    * [O]fovY100                    : output image fov in y direction
+    * [O]centerX                    : output image project center coordinate in x direction
+    * [O]centerY                    : output image project center coordinate in y direction
+    */
+    typedef struct rkAlgoAVS_PROJECT_CONFIG_S
+    {
+        uint32_t fovX100;
+        uint32_t fovY100;
+        int32_t centerX;
+        int32_t centerY;
+    }RKALGO_AVS_PROJECT_CONFIG_S;
 
 #ifdef __cplusplus
 } /* extern "C" { */

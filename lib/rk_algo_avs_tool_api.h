@@ -85,6 +85,22 @@ extern "C" {
     /* get AVS fov and center params from ROI params */
     DLL_PUBLIC int32_t RKALGO_AVS_GetAvsParamsFromRoiParams(RKALGO_AVS_ROI_PARAMS_TRANSFORM_IN_S *pstRoiParamsIn, RKALGO_AVS_ROI_PARAMS_TRANSFORM_OUT_S *pstRoiParamsOut);
 
+    /* get final LUT from calibration file */
+    DLL_PUBLIC int32_t RKALGO_AVS_GroundModel_GetFinalLutFromCalibParams(const RKALGO_AVS_GROUND_MODEL_PARAMS_S* pstGroundModelParams, RKALGO_AVS_FINAL_LUT_BUFFER_S* pstFinalLutBuf);
+  
+    /* conversion of ground Euler angle to original Euler angle */
+    DLL_PUBLIC int32_t RKALGO_AVS_GroundModel_EulerAngleToOriRotation (RKALGO_AVS_ROTATION_S* pGroundRotation, RKALGO_AVS_ROTATION_S* pOriRotation);
+
+    DLL_PUBLIC int32_t RKALGO_AVS_GroundModel_AutoGetStitchDistance(const RKALGO_AVS_AUTO_STITCH_DISTANCE_PARAM_S* pstAutoStitchDistanceParams, const float groundDistance, float* autoStitchDistance);
+
+    DLL_PUBLIC int32_t RKALGO_AVS_AutoGetStitchDistance(const RKALGO_AVS_AUTO_STITCH_DISTANCE_PARAM_S* pstAutoStitchDistanceParams, float* autoStitchDistance);
+
+    DLL_PUBLIC int32_t RKALGO_AVS_getGoodParams(const RKALGO_AVS_GOOD_PARAMS_CONFIG_S* pstGoodParamsConfig, RKALGO_AVS_PROJECT_CONFIG_S* pstProjectConfig);
+
+    DLL_PUBLIC int32_t RKALGO_AVS_GroundModel_getGoodParams(const RKALGO_AVS_GOOD_PARAMS_CONFIG_S* pstGoodParamsConfig, const float groundDistance, RKALGO_AVS_PROJECT_CONFIG_S* pstProjectConfig);
+
+    DLL_PUBLIC int32_t RKALGO_AVS_GroundModel_OptimizeParamsFromCalibParams(const RKALGO_AVS_GROUND_MODEL_OPTIMIZE_PARAMS_S* pstGroundParams, float* pGroundDistance);
+
 #ifdef __cplusplus
 } /* extern "C" { */
 #endif

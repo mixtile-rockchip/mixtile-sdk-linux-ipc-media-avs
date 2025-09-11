@@ -33,6 +33,7 @@ extern "C" {
         RKALGO_AVS_STATUS_FILE_WRITE_ERROR,
         RKALGO_AVS_STATUS_INVALID_PARAM,
         RKALGO_AVS_STATUS_ALLOC_FAILED,
+        RKALGO_AVS_STATUS_NOT_READY,
         RKALGO_AVS_STATUS_BUTT
     }RKALGO_AVS_STATUS_E;
 
@@ -91,6 +92,7 @@ extern "C" {
         RKALGO_AVS_FINAL_LUT_AFT = 4,
         RKALGO_AVS_FINAL_LUT_GPU_ALPHA_U16 = 5,
         RKALGO_AVS_FINAL_LUT_GPU_ALPHA_U8 = 6,
+        RKALGO_AVS_FINAL_LUT_GPU_ALPHA_DYNAMIC_U8 = 7,
         RKALGO_AVS_FINAL_LUT_BUTT
     }RKALGO_AVS_FINAL_LUT_TYPE_E;
 
@@ -142,6 +144,9 @@ extern "C" {
     * RKALGO_AVS_PROJECT_CYLINDRICAL             : cylindrical
     * RKALGO_AVS_PROJECT_CUBE_MAP                : cube map
     * RKALGO_AVS_PROJECT_EQUIRECTANGULAR_TRANS   : transverse equirectangular
+    * RKALGO_AVS_PROJECT_CYLINDRICAL_TRANS       : transverse cylindrical
+    * RKALGO_AVS_PROJECT_PANINI                  : panini
+    * RKALGO_AVS_PROJECT_PANINI_TRANS            : transverse panini
     * RKALGO_AVS_PROJECT_BUTT                    : reserved
     */
     typedef enum
@@ -151,6 +156,9 @@ extern "C" {
         RKALGO_AVS_PROJECT_CYLINDRICAL = 2,
         RKALGO_AVS_PROJECT_CUBE_MAP = 3,
         RKALGO_AVS_PROJECT_EQUIRECTANGULAR_TRANS = 4,
+        RKALGO_AVS_PROJECT_CYLINDRICAL_TRANS = 5,
+        RKALGO_AVS_PROJECT_PANINI = 6,
+        RKALGO_AVS_PROJECT_PANINI_TRANS = 7,
         RKALGO_AVS_PROJECT_BUTT
     }RKALGO_AVS_PROJECT_TYPE_E;
 
@@ -193,6 +201,20 @@ extern "C" {
         int32_t X;
         int32_t Y;
     }RKALGO_AVS_POINT_S;
+
+    /*
+    * @struct  RKALGO_AVS_MIDDLE_LUT_BUFFER_S
+    * @brief   the structure of output buffer for generating middle LUT from calib file
+    * [I]middleLutType              : the type of middle LUT
+    * [I]middleLutSize              : the size of middle LUT buffer
+    * [O]pMiddleLutBuf              : the middle LUT buffer
+    */
+    typedef struct rkAlgoAVS_MIDDLE_LUT_BUFFER_S
+    {
+        RKALGO_AVS_MIDDLE_LUT_TYPE_E middleLutType;
+        uint32_t middleLutSize;
+        float *pMiddleLutBuf[RKALGO_AVS_MAX_CAMERA_NUM];
+    }RKALGO_AVS_MIDDLE_LUT_BUFFER_S;
 
     /*
     * @struct  RKALGO_AVS_FINAL_LUT_PARAMS_S
@@ -326,6 +348,22 @@ extern "C" {
 
     }RKALGO_AVS_CAMERA_STATUS_S;
 
+    /*
+    * @enum    RKALGO_AVS_GROUND_MODEL_OPTIMIZE_OPTION
+    * @brief   camera optimization parameter options
+    * RKALGO_AVS_GROUNDMODEL_OPT_CAMERA_MODEL           : optimize camera extrinsic parameters and intrinsic parameters
+    * RKALGO_AVS_GROUNDMODEL_FIX_CAMERA_POSE            : fixed camera extrinsic parameters
+    * RKALGO_AVS_GROUNDMODEL_FIX_CAMERA_MATRIX          : fixed camera intrinsic parameters
+    * RKALGO_AVS_GROUNDMODEL_FIX_CAMERA_DISTORTION      : fixed camera distortion
+    */
+    typedef enum
+    {
+        RKALGO_AVS_GROUNDMODEL_OPT_CAMERA_MODEL = 1,
+        RKALGO_AVS_GROUNDMODEL_FIX_CAMERA_POSE = 2,
+        RKALGO_AVS_GROUNDMODEL_FIX_CAMERA_MATRIX = 4,
+        RKALGO_AVS_GROUNDMODEL_FIX_CAMERA_DISTORTION = 8,
+        RKALGO_AVS_GROUNDMODEL_FIX_BUTT
+    }RKALGO_AVS_GROUND_MODEL_OPTIMIZE_OPTION_E;
 
 #ifdef __cplusplus
 } /* extern "C" { */
